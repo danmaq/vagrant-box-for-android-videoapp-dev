@@ -1,24 +1,24 @@
 ---
 - name: Detect deployed FFmpeg.
   stat: 
-    path: /usr/local/src/FFmpeg-n1.2.11
+    path: /usr/local/src/FFmpeg-n1.2
   register: ffmpeg_deployed
 
 - name: Detect downloaded FFmpeg.
   stat: 
-    path: /vagrant/.tmp/n1.2.11.tar.gz
+    path: /vagrant/.tmp/n1.2.tar.gz
   register: ffmpeg_downloaded
   when: not ffmpeg_deployed.stat.exists
 
 - name: Download FFmpeg.
   get_url:
-    url: https://github.com/FFmpeg/FFmpeg/archive/n1.2.11.tar.gz
-    dest: /vagrant/.tmp/n1.2.11.tar.gz
+    url: https://github.com/FFmpeg/FFmpeg/archive/n1.2.tar.gz
+    dest: /vagrant/.tmp/n1.2.tar.gz
   when: ffmpeg_downloaded is defined and
         not ffmpeg_downloaded.stat.exists
 
 - name: Deploy FFmpeg.
-  shell: tar zxf /vagrant/.tmp/n1.2.11.tar.gz
+  shell: tar zxf /vagrant/.tmp/n1.2.tar.gz
   args:
     chdir: /usr/local/src/
   when: not ffmpeg_deployed.stat.exists
@@ -30,7 +30,7 @@
 
 - name: Validate build necessary.
   stat:
-    path: /usr/local/src/FFmpeg-n1.2.11/ffmpeg
+    path: /usr/local/src/FFmpeg-n1.2/ffmpeg
   register: ffmpeg_builded
   when: not ffmpeg_installed.stat.exists
 
@@ -39,7 +39,7 @@
   when: ffmpeg_builded is defined and
         not ffmpeg_builded.stat.exists
   args:
-    chdir: /usr/local/src/FFmpeg-n1.2.11
+    chdir: /usr/local/src/FFmpeg-n1.2
   become: true
   with_items:
     - ./configure --enable-pic --enable-shared --enable-stripping --enable-gpl
@@ -50,4 +50,4 @@
   when: not ffmpeg_installed.stat.exists
   become: true
   args:
-    chdir: /usr/local/src/FFmpeg-n1.2.11
+    chdir: /usr/local/src/FFmpeg-n1.2
