@@ -1,0 +1,7 @@
+---
+- name: Vagrant box for Android video-app develop environment using Qt.
+  hosts: all
+  roles:
+#    - core
+    - libs-android
+#    - libs-linux

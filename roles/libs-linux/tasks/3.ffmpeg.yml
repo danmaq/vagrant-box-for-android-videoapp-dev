@@ -1,0 +1,36 @@
+---
+- name: Cloning ffmpeg project from GitHub.
+  git:
+    repo: https://git.ffmpeg.org/ffmpeg.git
+    dest: /usr/local/src/ffmpeg
+    force: true
+  become: true
+
+- name: Validate installed ffmpeg.
+  stat: 
+    path: /usr/local/bin/ffmpeg
+  register: ffmpeg_installed
+
+- name: Validate build necessary.
+  stat:
+    path: /usr/local/src/ffmpeg/ffmpeg
+  register: ffmpeg_builded
+  when: not ffmpeg_installed.stat.exists
+
+- name: Build ffmpeg.
+  shell: '{{ item }}'
+  when: ffmpeg_builded is defined and
+        not ffmpeg_builded.stat.exists
+  args:
+    chdir: /usr/local/src/ffmpeg
+  become: true
+  with_items:
+    - ./configure --enable-pic --enable-shared --enable-stripping --enable-gpl
+    - make
+
+- name: Install builded ffmpeg.
+  shell: make install
+  when: not ffmpeg_installed.stat.exists
+  become: true
+  args:
+    chdir: /usr/local/src/ffmpeg

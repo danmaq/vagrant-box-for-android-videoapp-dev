@@ -1,0 +1,36 @@
+---
+- name: Cloning x264 project from GitHub.
+  git:
+    repo: https://github.com/mirror/x264.git
+    dest: /usr/local/src/x264
+    force: true
+  become: true
+
+- name: Validate installed x264.
+  stat: 
+    path: /usr/local/bin/x264
+  register: x264_installed
+
+- name: Validate build necessary.
+  stat:
+    path: /usr/local/src/x264/x264.o
+  register: x264_builded
+  when: not x264_installed.stat.exists
+
+- name: Build x264.
+  shell: '{{ item }}'
+  when: x264_builded is defined and
+        not x264_builded.stat.exists
+  args:
+    chdir: /usr/local/src/x264
+  become: true
+  with_items:
+    - ./configure
+    - make
+
+- name: Install builded x264.
+  shell: make install
+  when: not x264_installed.stat.exists
+  become: true
+  args:
+    chdir: /usr/local/src/x264

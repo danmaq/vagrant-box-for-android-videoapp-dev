@@ -1,0 +1,36 @@
+---
+- name: Cloning faad2 project from GitHub.
+  git:
+    repo: https://github.com/mecke/faad2.git
+    dest: /usr/local/src/faad2
+    force: true
+  become: true
+
+- name: Validate installed faad2.
+  stat: 
+    path: /usr/local/lib/libfaad.so
+  register: faad2_installed
+
+- name: Validate build necessary.
+  stat: 
+    path: /usr/local/src/faad2/libfaad/.libs
+  register: faad2_builded
+  when: not faad2_installed.stat.exists
+
+- name: Build faad2.
+  shell: '{{ item }}'
+  when: faad2_builded is defined and
+        not faad2_builded.stat.exists
+  args:
+    chdir: /usr/local/src/faad2
+  become: true
+  with_items:
+    - ./configure
+    - make
+
+- name: Install builded faad2.
+  shell: make install
+  when: not faad2_installed.stat.exists
+  become: true
+  args:
+    chdir: /usr/local/src/faad2

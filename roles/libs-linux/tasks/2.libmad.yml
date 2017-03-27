@@ -1,0 +1,47 @@
+---
+- name: Cloning libmad project from GitHub.
+  git:
+    repo: https://github.com/markjeee/libmad.git
+    dest: /usr/local/src/libmad
+    force: true
+  become: true
+
+- name: Validate installed libmad.
+  stat: 
+    path: /usr/local/lib/libmad.so
+  register: libmad_installed
+
+- name: Validate build necessary.
+  stat: 
+    path: /usr/local/src/libmad/.libs
+  register: libmad_builded
+  when: not libmad_installed.stat.exists
+
+- name: Remove -fforce-mem build option.
+  lineinfile:
+    dest: '/usr/local/src/libmad/{{ item }}'
+    regexp: '-fforce-mem'
+    line: ''
+  when: not libmad_installed.stat.exists
+  become: true
+  with_items:
+  - configure
+  - configure.ac
+
+- name: Build libmad.
+  shell: '{{ item }}'
+  when: libmad_builded is defined and
+        not libmad_builded.stat.exists
+  args:
+    chdir: /usr/local/src/libmad
+  become: true
+  with_items:
+    - ./configure
+    - make
+
+- name: Install builded libmad.
+  shell: make install
+  when: not libmad_installed.stat.exists
+  become: true
+  args:
+    chdir: /usr/local/src/libmad
