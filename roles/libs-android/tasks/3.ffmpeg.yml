@@ -16,6 +16,7 @@
     dest: /vagrant/.tmp/n1.2.tar.gz
   when: ffmpeg_downloaded is defined and
         not ffmpeg_downloaded.stat.exists
+  # 4853b5538f416ba4d519244fde8c14f2ff75e07b
 
 - name: Deploy FFmpeg.
   shell: tar zxf /vagrant/.tmp/n1.2.tar.gz
@@ -28,6 +29,7 @@
   args:
     chdir: ~/workspace/lib_android/
   when: not ffmpeg_built.stat.exists
+  # 91d353c92a02e745b7615fd1d224e3bce8ec6aff
 
 - name: Set environment var ANDROID_NDK.
   lineinfile:
