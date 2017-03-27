@@ -1,9 +1,4 @@
 ---
-- name: Detect deployed FFmpeg.
-  stat: 
-    path: ~/workspace/lib_android/FFmpeg-n3.2.4
-  register: ffmpeg_deployed
-
 - name: Detect built FFmpeg.
   stat: 
     path: ~/workspace/lib_android/avbuild/sdk-android-x86
@@ -11,46 +6,37 @@
 
 - name: Detect downloaded FFmpeg.
   stat: 
-    path: /vagrant/.tmp/n3.2.4.tar.gz
+    path: /vagrant/.tmp/n1.2.11.tar.gz
   register: ffmpeg_downloaded
-  when: not ffmpeg_built.stat.exists and
-        not ffmpeg_deployed.stat.exists
+  when: not ffmpeg_built.stat.exists
 
 - name: Download FFmpeg.
   get_url:
-    url: https://github.com/FFmpeg/FFmpeg/archive/n3.2.4.tar.gz
-    dest: /vagrant/.tmp/n3.2.4.tar.gz
+    url: https://github.com/FFmpeg/FFmpeg/archive/n1.2.11.tar.gz
+    dest: /vagrant/.tmp/n1.2.11.tar.gz
   when: ffmpeg_downloaded is defined and
         not ffmpeg_downloaded.stat.exists
 
 - name: Deploy FFmpeg.
-  shell: tar zxf /vagrant/.tmp/n3.2.4.tar.gz
+  shell: tar zxf /vagrant/.tmp/n1.2.11.tar.gz
   args:
     chdir: ~/workspace/lib_android/
-  when: not ffmpeg_built.stat.exists and
-        not ffmpeg_deployed.stat.exists
+  when: not ffmpeg_built.stat.exists
 
-- name: Cloning avbuild project from GitHub.
-  git:
-    repo: https://github.com/wang-bin/avbuild.git
-    dest: ~/workspace/lib_android/avbuild
-    version: f3378446f0f705ce7c90bd6210c403c7ecb1656f
-    # Latest passed CI version.
+- name: Deploy build_ffmpeg.
+  shell: tar Jxf /vagrant/src/build_ffmpeg.tar.xz
+  args:
+    chdir: ~/workspace/lib_android/
   when: not ffmpeg_built.stat.exists
 
 - name: Set environment var ANDROID_NDK.
   lineinfile:
     dest: ~/.bashrc
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
-  with_items:
-  - regexp: '^export\sANDROID_NDK =\$\{ANDROID_NDK_HOME\}'
+    regexp: '^export\sANDROID_NDK =\$\{ANDROID_NDK_HOME\}'
     line: 'export ANDROID_NDK=${ANDROID_NDK_HOME}'
-  - regexp: '^export\sFFSRC=~/workspace/lib_android/FFmpeg-n3.2.4'
-    line: 'export FFSRC=~/workspace/lib_android/FFmpeg-n3.2.4'
 
 - name: Build FFmpeg.
-  shell: ./avbuild.sh android
+  shell: ./build_ffmpeg.sh android
   args:
-    chdir: ~/workspace/lib_android/avbuild
+    chdir: ~/workspace/lib_android/
   when: not ffmpeg_built.stat.exists

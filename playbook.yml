@@ -4,4 +4,4 @@
   roles:
 #    - core
     - libs-android
-#    - libs-linux
+    - libs-linux

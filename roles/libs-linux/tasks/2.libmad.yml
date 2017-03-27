@@ -1,25 +1,31 @@
 ---
-- name: Cloning libmad project from GitHub.
-  git:
-    repo: https://github.com/markjeee/libmad.git
-    dest: /usr/local/src/libmad
-    force: true
-  become: true
-
-- name: Validate installed libmad.
+- name: Detect installed libmad.
   stat: 
     path: /usr/local/lib/libmad.so
   register: libmad_installed
 
-- name: Validate build necessary.
+- name: Detect downloaded libmad.
   stat: 
-    path: /usr/local/src/libmad/.libs
-  register: libmad_builded
+    path: /vagrant/.tmp/libmad-0.15.0b.tar.gz
+  register: libmad_downloaded
+
+- name: Download libmad.
+  get_url:
+    url: ftp://ftp.mars.org/pub/mpeg/libmad-0.15.0b.tar.gz
+    dest: /vagrant/.tmp/libmad-0.15.0b.tar.gz
+  when: libmad_downloaded is defined and
+        not libmad_downloaded.stat.exists
+
+- name: Deploy libmad.
+  shell: tar zxf /vagrant/.tmp/libmad-0.15.0b.tar.gz
+  args:
+    chdir: /usr/local/src/
+  become: true
   when: not libmad_installed.stat.exists
 
 - name: Remove -fforce-mem build option.
   lineinfile:
-    dest: '/usr/local/src/libmad/{{ item }}'
+    dest: '/usr/local/src/libmad-0.15.0b/{{ item }}'
     regexp: '-fforce-mem'
     line: ''
   when: not libmad_installed.stat.exists
@@ -30,10 +36,9 @@
 
 - name: Build libmad.
   shell: '{{ item }}'
-  when: libmad_builded is defined and
-        not libmad_builded.stat.exists
+  when: not libmad_installed.stat.exists
   args:
-    chdir: /usr/local/src/libmad
+    chdir: /usr/local/src/libmad-0.15.0b
   become: true
   with_items:
     - ./configure
@@ -44,4 +49,4 @@
   when: not libmad_installed.stat.exists
   become: true
   args:
-    chdir: /usr/local/src/libmad
+    chdir: /usr/local/src/libmad-0.15.0b

@@ -11,19 +11,12 @@
     path: /usr/local/lib/libfaad.so
   register: faad2_installed
 
-- name: Validate build necessary.
-  stat: 
-    path: /usr/local/src/faad2/libfaad/.libs
-  register: faad2_builded
-  when: not faad2_installed.stat.exists
-
 - name: Build faad2.
   shell: '{{ item }}'
-  when: faad2_builded is defined and
-        not faad2_builded.stat.exists
   args:
     chdir: /usr/local/src/faad2
   become: true
+  when: not faad2_installed.stat.exists
   with_items:
     - ./configure
     - make

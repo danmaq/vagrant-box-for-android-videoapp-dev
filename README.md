@@ -1,6 +1,18 @@
-# vagrant-box-for-android-videoapp-dev
+# [danmaq/openSUSE-42.1-x86_64-Android-Qt-videoapp-dev-env](https://atlas.hashicorp.com/danmaq/boxes/openSUSE-42.1-x86_64-Android-Qt-videoapp-dev-env)
 
 Vagrant box for Android video-app develop environment using Qt.
+
+* openSUSE Leap 42.1 (from opensuse/openSUSE-42.1-x86_64 1.0.1)
+* patterns-openSUSE-devel_C_C++
+* Qt 5.6
+* Android SDK (API 21)
+* Android NDK r10e
+* FFmpeg
+* faad2
+* libmad
+* x264
+* libSDL2-devel
+* others (see Process overview)
 
 ## base box
 

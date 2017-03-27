@@ -3,6 +3,7 @@
   git:
     repo: https://github.com/mirror/x264.git
     dest: /usr/local/src/x264
+    version: 3f5ed56d4105f68c01b86f94f41bb9bbefa3433b
     force: true
   become: true
 
@@ -11,16 +12,9 @@
     path: /usr/local/bin/x264
   register: x264_installed
 
-- name: Validate build necessary.
-  stat:
-    path: /usr/local/src/x264/x264.o
-  register: x264_builded
-  when: not x264_installed.stat.exists
-
 - name: Build x264.
   shell: '{{ item }}'
-  when: x264_builded is defined and
-        not x264_builded.stat.exists
+  when: not x264_installed.stat.exists
   args:
     chdir: /usr/local/src/x264
   become: true
