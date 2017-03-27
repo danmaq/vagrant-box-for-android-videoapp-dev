@@ -3,7 +3,7 @@
   git:
     repo: https://github.com/mecke/faad2.git
     dest: /usr/local/src/faad2
-    version: d5c1399ca8b1e8fed03a18d8422e352a327c29e8
+    version: b837128d2afef284e3fec79989e4d340b1e68ab6
     force: true
   become: true
 
