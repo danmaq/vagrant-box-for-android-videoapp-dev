@@ -1,21 +1,32 @@
 ---
-- name: Cloning faad2 project from GitHub.
-  git:
-    repo: https://github.com/mecke/faad2.git
-    dest: /usr/local/src/faad2
-    version: b837128d2afef284e3fec79989e4d340b1e68ab6
-    force: true
-  become: true
-
 - name: Validate installed faad2.
   stat: 
-    path: /usr/local/lib/libfaad.so
+    path: /usr/local/lib64/libfaad.so
   register: faad2_installed
+
+- name: Validate downloaded faad2.
+  stat: 
+    path: /vagrant/.tmp/faad2-2.7.tar.bz2
+  register: faad2_downloaded
+
+- name: Download faad2 from SourceForge
+  get_url:
+    url: https://downloads.sourceforge.net/project/faac/faad2-src/faad2-2.7/faad2-2.7.tar.bz2
+    dest: /vagrant/.tmp/faad2-2.7.tar.bz2
+  when: faad2_downloaded is defined and
+        not faad2_downloaded.stat.exists
+
+- name: Deploy faad2
+  shell: tar jxf /vagrant/.tmp/faad2-2.7.tar.bz2
+  args:
+    chdir: /usr/local/src/
+  become: true
+  when: not faad2_installed.stat.exists
 
 - name: Build faad2.
   shell: '{{ item }}'
   args:
-    chdir: /usr/local/src/faad2
+    chdir: /usr/local/src/faad2-2.7
   become: true
   when: not faad2_installed.stat.exists
   with_items:
@@ -27,4 +38,4 @@
   when: not faad2_installed.stat.exists
   become: true
   args:
-    chdir: /usr/local/src/faad2
+    chdir: /usr/local/src/faad2-2.7
