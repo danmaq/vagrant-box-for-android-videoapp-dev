@@ -1,5 +1,5 @@
 ---
-- name: Install basic dev tools.
+- name: Install some standard development tools.
   zypper:
     name: '{{ item.package }}'
     state: latest

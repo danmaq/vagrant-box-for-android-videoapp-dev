@@ -2,20 +2,21 @@
 - name: Cloning faad2 project from GitHub.
   git:
     repo: https://github.com/xxDroid/faad2-android.git
-    dest: ~/workspace/lib_android/faad2-android
+    dest: ~/lib/android/faad2-android
+    version: d5c1399ca8b1e8fed03a18d8422e352a327c29e8
 
 - name: Deploy .mk file for build Android project.
   template:
     src: Application.mk.j2
-    dest: ~/workspace/lib_android/faad2-android/android/jni/Application.mk
+    dest: ~/lib/android/faad2-android/android/jni/Application.mk
 
-- name: Validate build necessary.
+- name: Validate necessity of build faad2.
   stat: 
-    path: ~/workspace/lib_android/faad2-android/android/obj
+    path: ~/lib/android/faad2-android/android/obj
   register: faad2_builded
 
 - name: Build faad2.
   shell: ~/android-ndk-r10e/ndk-build
   args:
-    chdir: ~/workspace/lib_android/faad2-android/android/
+    chdir: ~/lib/android/faad2-android/android/
   when: not faad2_builded.stat.exists

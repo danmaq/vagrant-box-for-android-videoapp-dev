@@ -1,8 +1,7 @@
 ---
-- name: Cleanup zypper repos cache.
-  shell: zypper clean
+- name: Rebuild dependencies caches.
+  shell: /sbin/ldconfig
   become: yes
-  ignore_errors: true
   changed_when: false
 
 - name: Cleanup btrfs snapshot.
@@ -10,6 +9,3 @@
   become: yes
   ignore_errors: true
   changed_when: false
-
-- name: VM Reload if require
-  meta: flush_handlers

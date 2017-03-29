@@ -3,3 +3,4 @@
 - include: 2.libmad.yml
 - include: 3.ffmpeg.yml
 
+- include: _clean.yml

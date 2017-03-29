@@ -4,25 +4,24 @@
     repo: https://github.com/FFmpeg/FFmpeg.git
     dest: /usr/local/src/FFmpeg
     version: 4853b5538f416ba4d519244fde8c14f2ff75e07b
-    force: true
   become: true
 
-- name: Validate installed ffmpeg.
+- name: Validate necessity of build FFmpeg.
   stat: 
     path: /usr/local/bin/ffmpeg
   register: ffmpeg_installed
 
-- name: Build ffmpeg.
+- name: Build FFmpeg.
   shell: '{{ item }}'
   when: not ffmpeg_installed.stat.exists
+  become: true
   args:
     chdir: /usr/local/src/FFmpeg
-  become: true
   with_items:
     - ./configure --enable-pic --enable-shared --enable-stripping --enable-gpl
     - make
 
-- name: Install builded ffmpeg.
+- name: Install built FFmpeg binaries.
   shell: make install
   when: not ffmpeg_installed.stat.exists
   become: true

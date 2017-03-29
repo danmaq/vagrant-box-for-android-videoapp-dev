@@ -1,37 +1,23 @@
 ---
-- name: Detect built FFmpeg.
+- name: Cloning FFmpeg project from GitHub.
+  git:
+    repo: https://git.ffmpeg.org/ffmpeg.git
+    dest: ~/lib/android/ffmpeg
+    version: 443c9fab57fababd864dc13f7bdc16b330cbd481
+
+- name: Cloning avbuild (build_ffmpeg) project from GitHub.
+  git:
+    repo: https://github.com/wang-bin/avbuild.git
+    dest: ~/lib/android/build_ffmpeg
+    version: 91d353c92a02e745b7615fd1d224e3bce8ec6aff
+    force: true
+
+- name: Validate necessity of build FFmpeg.
   stat: 
-    path: ~/workspace/lib_android/build_ffmpeg/sdk-android-x86
+    path: ~/lib/android/build_ffmpeg/sdk-android-x86
   register: ffmpeg_built
 
-- name: Detect downloaded FFmpeg.
-  stat: 
-    path: /vagrant/.tmp/n1.2.tar.gz
-  register: ffmpeg_downloaded
-  when: not ffmpeg_built.stat.exists
-
-- name: Download FFmpeg.
-  get_url:
-    url: https://github.com/FFmpeg/FFmpeg/archive/n1.2.tar.gz
-    dest: /vagrant/.tmp/n1.2.tar.gz
-  when: ffmpeg_downloaded is defined and
-        not ffmpeg_downloaded.stat.exists
-  # 4853b5538f416ba4d519244fde8c14f2ff75e07b
-
-- name: Deploy FFmpeg.
-  shell: tar zxf /vagrant/.tmp/n1.2.tar.gz
-  args:
-    chdir: ~/workspace/lib_android/
-  when: not ffmpeg_built.stat.exists
-
-- name: Deploy build_ffmpeg.
-  shell: tar Jxf /vagrant/src/build_ffmpeg.tar.xz
-  args:
-    chdir: ~/workspace/lib_android/
-  when: not ffmpeg_built.stat.exists
-  # 91d353c92a02e745b7615fd1d224e3bce8ec6aff
-
-- name: Set environment var ANDROID_NDK.
+- name: Set environment vars for build FFmpeg.
   lineinfile:
     dest: ~/.bashrc
     regexp: '{{ item.regexp }}'
@@ -39,11 +25,30 @@
   with_items:
   - regexp: '^export\sANDROID_NDK=\$\{ANDROID_NDK_HOME\}'
     line: 'export ANDROID_NDK=${ANDROID_NDK_HOME}'
-  - regexp: '^export\sFFSRC=~/workspace/lib_android/FFmpeg-n1.2'
-    line: 'export FFSRC=~/workspace/lib_android/FFmpeg-n1.2'
+  - regexp: '^export\sFFSRC=~/lib/android/ffmpeg'
+    line: 'export FFSRC=~/lib/android/ffmpeg'
+
+- name: Customizing avbuild because build FFmpeg for Android.
+  lineinfile:
+    dest: '~/lib/android/build_ffmpeg/{{ item.dest }}'
+    regexp: '{{ item.regexp }}'
+    line: '{{ item.line }}'
+  with_items:
+  - dest: 'config-android.sh'
+    regexp: '^NDK_ROOT=.*'
+    line: 'NDK_ROOT=${ANDROID_NDK_HOME}'
+  - dest: 'build_ffmpeg.sh'
+    regexp: 'USER_CONFIG=config-\$\{TAGET_FLAG\}\.sh'
+    line: 'NDK_ROOT=${ANDROID_NDK_HOME} #USER_CONFIG=config-${TAGET_FLAG}.sh'
+  - dest: 'build_ffmpeg.sh'
+    regexp: 'test\s+-f\s+\$USER_CONFIG\s+&&\s+\.\s+\$USER_CONFIG'
+    line: 'USER_OPT="--disable-muxers --disable-encoders --disable-avdevice" #test -f $USER_CONFIG &&  . $USER_CONFIG'
 
 - name: Build FFmpeg.
-  shell: ./build_ffmpeg.sh android
+  shell: './build_ffmpeg.sh {{ item }}'
   args:
-    chdir: ~/workspace/lib_android/build_ffmpeg
+    chdir: ~/lib/android/build_ffmpeg
   when: not ffmpeg_built.stat.exists
+  with_items:
+  - 'android'
+  - 'android x86'
