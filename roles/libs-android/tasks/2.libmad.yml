@@ -1,0 +1,22 @@
+---
+- name: Cloning libmad project from GitHub.
+  git:
+    repo: https://github.com/xxDroid/libmad-android.git
+    dest: ~/lib/android/libmad-android
+    version: 6dc42e47fbc73c6efa1b01197597b2bca888df64
+
+- name: Deploy .mk file for build Android project.
+  template:
+    src: Application.mk.j2
+    dest: ~/lib/android/libmad-android/android/jni/Application.mk
+
+- name: Validate necessity of build libmad.
+  stat: 
+    path: ~/lib/android/libmad-android/android/obj
+  register: libmad_builded
+
+- name: Build libmad.
+  shell: ~/android-ndk-r10e/ndk-build
+  args:
+    chdir: ~/lib/android/libmad-android/android/
+  when: not libmad_builded.stat.exists

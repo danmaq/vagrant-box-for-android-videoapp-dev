@@ -1,0 +1,41 @@
+---
+- name: Validate necessity of build faad2.
+  stat: 
+    path: /usr/local/lib64/libfaad.so
+  register: faad2_installed
+
+- name: Validate necessity of download faad2.
+  stat: 
+    path: /vagrant/.tmp/faad2-2.7.tar.bz2
+  register: faad2_downloaded
+
+- name: Download faad2 from SourceForge.
+  get_url:
+    url: https://downloads.sourceforge.net/project/faac/faad2-src/faad2-2.7/faad2-2.7.tar.bz2
+    dest: /vagrant/.tmp/faad2-2.7.tar.bz2
+  when: faad2_downloaded is defined and
+        not faad2_downloaded.stat.exists
+
+- name: De-compress and deploy faad2.
+  shell: tar jxf /vagrant/.tmp/faad2-2.7.tar.bz2
+  become: true
+  args:
+    chdir: /usr/local/src/
+  when: not faad2_installed.stat.exists
+
+- name: Build faad2.
+  shell: '{{ item }}'
+  when: not faad2_installed.stat.exists
+  become: true
+  args:
+    chdir: /usr/local/src/faad2-2.7
+  with_items:
+    - ./configure
+    - make
+
+- name: Install built faad2 binaries.
+  shell: make install
+  when: not faad2_installed.stat.exists
+  become: true
+  args:
+    chdir: /usr/local/src/faad2-2.7

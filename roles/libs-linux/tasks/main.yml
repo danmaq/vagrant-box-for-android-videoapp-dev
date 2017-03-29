@@ -1,0 +1,7 @@
+---
+- include: 1.faad2.yml
+- include: 2.libmad.yml
+- include: 3.ffmpeg.yml
+- include: 4.x264.yml
+
+- include: _clean.yml

@@ -1,0 +1,13 @@
+---
+- name: Install some standard development tools.
+  zypper:
+    name: '{{ item.package }}'
+    state: latest
+  become: yes
+  with_items:
+  - package: git
+  - package: ant
+  - package: yasm
+  - package: libSDL2-devel
+
+- include: _clean.yml

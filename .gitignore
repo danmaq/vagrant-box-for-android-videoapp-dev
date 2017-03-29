@@ -1,0 +1,8 @@
+.vagrant/
+.tmp/
+
+.DS_Store
+Thumbs.db
+*.log
+*.box
+
